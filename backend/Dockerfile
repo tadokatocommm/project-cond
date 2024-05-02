@@ -5,16 +5,13 @@ FROM php:8.2-fpm
 WORKDIR /var/www/html
 
 # Install PHP dependencies
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip
+RUN apt-get -y update && \
+    apt-get -y install curl nano git vim zip unzip libxml2-dev libmemcached-dev libmcrypt-dev zlib1g-dev libsodium-dev && \
+    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install mysqli pdo pdo_mysql  xml pcntl intl fileinfo sockets bcmath sockets sodium exif \
+    && docker-php-ext-enable mysqli pdo pdo_mysql  xml pcntl intl fileinfo sockets bcmath sockets sodium exif
+
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
