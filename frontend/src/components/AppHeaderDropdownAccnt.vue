@@ -1,56 +1,71 @@
-<script setup>
-import avatar from '@/assets/images/avatars/8.jpg'
-
-const itemsCount = 42
-</script>
-
 <template>
-  <CDropdown placement="bottom-end" variant="nav-item">
-    <CDropdownToggle class="py-0 pe-0" :caret="false">
-      <CAvatar :src="avatar" size="md" />
+  <CDropdown variant="nav-item">
+    <CDropdownToggle placement="bottom-end" class="py-0" :caret="false">
+      <CAvatar :src="avatar" size="md" class="avatar-padding my-1" /> 
     </CDropdownToggle>
     <CDropdownMenu class="pt-0">
-      <CDropdownHeader
-        component="h6"
-        class="bg-body-secondary text-body-secondary fw-semibold mb-2 rounded-top"
-      >
-        Account
+      <CDropdownHeader component="h6" class="bg-light fw-semibold py-2">
+        Conta
       </CDropdownHeader>
       <CDropdownItem>
-        <CIcon icon="cil-bell" /> Updates
-        <CBadge color="info" class="ms-auto">{{ itemsCount }}</CBadge>
+        <CIcon icon="cilUser" /> Seus dados
+        <CBadge color="secondary" class="ms-auto"></CBadge>
       </CDropdownItem>
-      <CDropdownItem>
-        <CIcon icon="cil-envelope-open" /> Messages
-        <CBadge color="success" class="ms-auto">{{ itemsCount }}</CBadge>
-      </CDropdownItem>
-      <CDropdownItem>
-        <CIcon icon="cil-task" /> Tasks
-        <CBadge color="danger" class="ms-auto">{{ itemsCount }}</CBadge>
-      </CDropdownItem>
-      <CDropdownItem>
-        <CIcon icon="cil-comment-square" /> Comments
-        <CBadge color="warning" class="ms-auto">{{ itemsCount }}</CBadge>
-      </CDropdownItem>
-      <CDropdownHeader
-        component="h6"
-        class="bg-body-secondary text-body-secondary fw-semibold my-2"
-      >
-        Settings
-      </CDropdownHeader>
-      <CDropdownItem> <CIcon icon="cil-user" /> Profile </CDropdownItem>
-      <CDropdownItem> <CIcon icon="cil-settings" /> Settings </CDropdownItem>
-      <CDropdownItem>
-        <CIcon icon="cil-dollar" /> Payments
-        <CBadge color="secondary" class="ms-auto">{{ itemsCount }}</CBadge>
-      </CDropdownItem>
-      <CDropdownItem>
-        <CIcon icon="cil-file" /> Projects
-        <CBadge color="primary" class="ms-auto">{{ itemsCount }}</CBadge>
-      </CDropdownItem>
+      <CDropdownItem> <CIcon icon="cilCalendar" /> Reservas </CDropdownItem>
       <CDropdownDivider />
-      <CDropdownItem> <CIcon icon="cil-shield-alt" /> Lock Account </CDropdownItem>
-      <CDropdownItem> <CIcon icon="cil-lock-locked" /> Logout </CDropdownItem>
+      <CDropdownItem @click="logout"> <CIcon icon="cil-lock-locked" /> Logout </CDropdownItem>
     </CDropdownMenu>
   </CDropdown>
 </template>
+
+<script>
+import avatar from '@/assets/images/avatars/8.jpg';
+import axios from 'axios';
+import { useRouter } from 'vue-router';
+
+export default {
+  name: 'AppHeaderDropdownAccnt',
+  setup() {
+    const router = useRouter();
+    return {
+      avatar: avatar,
+    };
+  },
+  methods: {
+    logout() {
+      const token = localStorage.getItem('token');
+      console.log('Token:', token);
+      if (!token) {
+        alert('Usuário não autenticado. Impossível fazer logout.');
+        return;
+      }
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      axios.post('http://localhost:8000/api/logout', null, config)
+        .then(response => {
+          if (response.status === 200) {
+            console.log('Logout realizado com sucesso', response.data);
+            localStorage.removeItem('token');
+             this.$router.push({ name: 'Login' });
+          } else {
+            console.error('Erro ao fazer logout', response.data.message);
+            alert('O logout falhou. Tente novamente');
+          }
+        })
+        .catch(error => {
+          console.error('Erro ao fazer logout', error.message);
+          alert('O logout falhou. Tente novamente');
+        });
+    },
+  },
+};
+</script>
+
+<style scoped>
+.avatar-padding {
+  padding-right: 10px; 
+}
+</style>
